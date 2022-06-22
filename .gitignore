@@ -1,0 +1,9 @@
+*
+!.gitignore
+!CMakeLists.txt
+!httplib.h
+!httplib_internal.h
+!httplib.c
+!httputil.c
+!httpser.c
+!httpparse.c
