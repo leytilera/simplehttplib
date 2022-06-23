@@ -68,13 +68,13 @@ char * httplib_request_get_header(http_request * self, char * key) {
 int httplib_is_valid_header(const char * key, const char * value) {
     for (int i = 0; key[i] != '\0'; i++) {
         char c = key[i];
-        if ((c < 65 && c != '-') || (c > 90 && c < 97 && c != '_') || c > 122) {
+        if ((c < 'A' && c != '-') || (c > 'Z' && c < 'a' && c != '_') || c > 'z') {
             return 0;
         }
     }
     for (int i = 0; value[i] != '\0'; i++) {
         char c = value[i];
-        if (c < 32 || c > 126) {
+        if (c < ' ' || c > '~') {
             return 0;
         }
     }
