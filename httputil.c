@@ -149,12 +149,12 @@ char * httplib_request_get_query_value(http_request * self, char * key) {
 void httplib_response_set_content_length(http_response * self, size_t length) {
     self->content_length = length;
     if (length > 0)
-        self->body = malloc(length);
+        self->body = realloc(self->body, length);
 }
 
 void httplib_response_set_status(http_response * self, int code, char * message) {
     self->status_code = code;
-    self->status_message = malloc(strlen(message)+1);
+    self->status_message = realloc(self->status_message, strlen(message)+1);
     strcpy(self->status_message, message);
 }
 
