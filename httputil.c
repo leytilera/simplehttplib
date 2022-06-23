@@ -41,7 +41,7 @@ int httplib_response_add_header(http_response * self, char * key, char * value) 
         self->headers = httplib_header_new(key, value);
     } else {
         http_header * run = self->headers;
-        while (run != 0) {
+        while (run) {
             if (run->next == 0) {
                 run->next = httplib_header_new(key, value);
                 break;
@@ -54,7 +54,7 @@ int httplib_response_add_header(http_response * self, char * key, char * value) 
 
 char * httplib_request_get_header(http_request * self, char * key) {
     http_header * run = self->headers;
-    while (run != 0) {
+    while (run) {
         if (!strcasecmp(key, run->key)) {
             char * value = malloc(strlen(run->value)+1);
             strcpy(value, run->value);

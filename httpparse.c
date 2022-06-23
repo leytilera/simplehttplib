@@ -152,7 +152,7 @@ int httplib_parse_header(http_request * self, char * str) {
             self->headers = httplib_header_new(key, value);
         } else {
             http_header * run = self->headers;
-            while (run != 0) {
+            while (run) {
                 if (run->next == 0) {
                     run->next = httplib_header_new(key, value);
                     break;

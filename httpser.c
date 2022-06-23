@@ -30,7 +30,7 @@ int httplib_response_serialize(http_response * res, char * str_out) {
     strcat(str_out, res->status_message);
     strcat(str_out, "\r\n");
     http_header * run = res->headers;
-    while (run != 0) {
+    while (run) {
         char * tmp = malloc(httplib_header_string_size(run));
         int err = httplib_header_serialize(run, tmp);
         if (err != 0) return err;
@@ -48,8 +48,7 @@ int httplib_response_serialize(http_response * res, char * str_out) {
         strcat(str_out, "\r\n");
     }
     strcat(str_out, "\r\n");
-    size_t end_pos = 0;
-    while (str_out[end_pos] != '\0') end_pos++;
+    size_t end_pos = strlen(str_out) - 1;
     if (res->body != 0) {
         for (size_t i = 0; i < res->content_length; i++) {
             str_out[end_pos + i] = res->body[i];
@@ -62,7 +61,7 @@ size_t httplib_response_string_size(http_response * res) {
     size_t res_line = 15 + strlen(res->status_message); //"HTTP/1.1" 000 (message)\r\n
     size_t headers = 2; // \r\n
     http_header * run = res->headers;
-    while (run != 0) {
+    while (run) {
         headers += httplib_header_string_size(run) + 1; // \r\n instead of \0
         run = run->next;
     }
