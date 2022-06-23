@@ -3,7 +3,7 @@
 #include "httplib.h"
 #include "httplib_internal.h"
 
-int parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp, enum req_pos * pos, int * was_cr) {
+int httplib_parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp, enum req_pos * pos, int * was_cr) {
     for (int i = 0; i < bytes; i++) {
         if (buf[i] == '\r') {
             *was_cr = 1;
@@ -11,37 +11,37 @@ int parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp,
         }
 
         if (*pos == METHOD && buf[i] == ' ') {
-            int res = parse_method(tmp->buf, &req->method);
+            int res = httplib_parse_method(tmp->buf, &req->method);
             if (res < 0) {
                 return 4;
             } else {
                 *pos = PATH;
-                reset_tmp(tmp);
+                httplib_tmp_reset(tmp);
             }
         } else if (*pos == QUERY && buf[i] == ' ') {
             req->query = malloc(strlen(tmp->buf) + 1);
             strcpy(req->query, tmp->buf);
             *pos = VERSION;
-            reset_tmp(tmp);
+            httplib_tmp_reset(tmp);
             //TODO check if valid
         } else if (*pos == PATH && buf[i] == ' ') {
             *pos = VERSION;
             req->path = malloc(strlen(tmp->buf) + 1);
             strcpy(req->path, tmp->buf);
-            reset_tmp(tmp);
+            httplib_tmp_reset(tmp);
         } else if (*pos == VERSION && *was_cr && buf[i] == '\n') {
             *pos = HEADERS;
             if (strcmp(tmp->buf, "HTTP/1.1") != 0) {
                 return 3;
             }
-            reset_tmp(tmp);
+            httplib_tmp_reset(tmp);
         } else if (*pos == PATH && buf[i] == '?') {
             *pos = QUERY;
             req->path = malloc(strlen(tmp->buf) + 1);
             strcpy(req->path, tmp->buf);
-            reset_tmp(tmp);
+            httplib_tmp_reset(tmp);
         } else if (*pos == HEADERS && *was_cr && buf[i] == '\n') {
-            int res = parse_header(req, tmp->buf);
+            int res = httplib_parse_header(req, tmp->buf);
             if (res < 0) {
                 return 4;
             } else if (res > 0) {
@@ -50,10 +50,10 @@ int parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp,
                     req->body = malloc(req->content_length);
                 }
             }
-            reset_tmp(tmp);
+            httplib_tmp_reset(tmp);
         } else if (*pos != BODY) {
             if (tmp->pos == tmp->size - 1) {
-                increase_tmp(tmp);
+                httplib_tmp_increase(tmp);
             }
             tmp->buf[tmp->pos] = buf[i];
             tmp->pos++;
@@ -75,7 +75,7 @@ int parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp,
     return 0;
 }
 
-int parse_method(char * method_str, http_method * method_out) {
+int httplib_parse_method(char * method_str, http_method * method_out) {
     if (!strcmp(method_str, "GET")) {
         *method_out = GET;
     } else if (!strcmp(method_str, "POST")) {
@@ -100,7 +100,7 @@ int parse_method(char * method_str, http_method * method_out) {
     return 0;
 }
 
-int parse_header(http_request * self, char * str) {
+int httplib_parse_header(http_request * self, char * str) {
     size_t len = strlen(str);
     if (len == 0) {
         return 1;
@@ -145,14 +145,14 @@ int parse_header(http_request * self, char * str) {
     if (strcasecmp("Content-Length", key) == 0) {
         self->content_length = strtoul(value, 0, 10);
         return 0;
-    } else if (is_valid_header(key, value)) {
+    } else if (httplib_is_valid_header(key, value)) {
         if (self->headers == 0) {
-            self->headers = new_header(key, value);
+            self->headers = httplib_header_new(key, value);
         } else {
             http_header * run = self->headers;
             while (run != 0) {
                 if (run->next == 0) {
-                    run->next = new_header(key, value);
+                    run->next = httplib_header_new(key, value);
                     break;
                 }
                 run = run->next;

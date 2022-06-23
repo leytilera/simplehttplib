@@ -4,8 +4,8 @@
 #include "httplib.h"
 #include "httplib_internal.h"
 
-int header_to_string(http_header * header, char * str_out) {
-    if (!is_valid_header(header->key, header->value))
+int httplib_header_serialize(http_header * header, char * str_out) {
+    if (!httplib_is_valid_header(header->key, header->value))
         return -1;
 
     strcpy(str_out, header->key);
@@ -14,13 +14,13 @@ int header_to_string(http_header * header, char * str_out) {
     return 0;
 }
 
-size_t header_string_size(http_header * header) {
+size_t httplib_header_string_size(http_header * header) {
     size_t key_len = strlen(header->key);
     size_t value_len = strlen(header->value);
     return key_len + value_len + 2;
 }
 
-int serialize_response(http_response * res, char * str_out) {
+int httplib_response_serialize(http_response * res, char * str_out) {
     strcpy(str_out, "HTTP/1.1 ");
     if (res->status_code < 100 || res->status_code > 599) return -1;
     char status[4];
@@ -31,8 +31,8 @@ int serialize_response(http_response * res, char * str_out) {
     strcat(str_out, "\r\n");
     http_header * run = res->headers;
     while (run != 0) {
-        char * tmp = malloc(header_string_size(run));
-        int err = header_to_string(run, tmp);
+        char * tmp = malloc(httplib_header_string_size(run));
+        int err = httplib_header_serialize(run, tmp);
         if (err != 0) return err;
         strcat(str_out, tmp);
         free(tmp);
@@ -58,12 +58,12 @@ int serialize_response(http_response * res, char * str_out) {
     return 0;
 }
 
-size_t response_size(http_response * res) {
+size_t httplib_response_string_size(http_response * res) {
     size_t res_line = 15 + strlen(res->status_message); //"HTTP/1.1" 000 (message)\r\n
     size_t headers = 2; // \r\n
     http_header * run = res->headers;
     while (run != 0) {
-        headers += header_string_size(run) + 1; // \r\n instead of \0
+        headers += httplib_header_string_size(run) + 1; // \r\n instead of \0
         run = run->next;
     }
     if (res->content_length > 0) {

@@ -4,7 +4,7 @@
 #include "httplib_internal.h"
 #include <stdio.h>
 
-http_header * new_header(char * key, char * value) {
+http_header * httplib_header_new(char * key, char * value) {
     http_header * header = malloc(sizeof(http_header));
     header->next = 0;
     header->key = malloc(strlen(key)+1);
@@ -14,7 +14,7 @@ http_header * new_header(char * key, char * value) {
     return header;
 }
 
-http_request * new_request() {
+http_request * httplib_request_new() {
     http_request * req = malloc(sizeof(http_request));
     req->method = GET;
     req->headers = 0;
@@ -25,7 +25,7 @@ http_request * new_request() {
     return req;
 }
 
-http_response * new_response() {
+http_response * httplib_response_new() {
     http_response * res = malloc(sizeof(http_request));
     res->status_message = 0;
     res->headers = 0;
@@ -35,15 +35,15 @@ http_response * new_response() {
     return res;
 }
 
-int add_header(http_response * self, char * key, char * value) {
-    if (!is_valid_header(key, value)) return -1;
+int httplib_response_add_header(http_response * self, char * key, char * value) {
+    if (!httplib_is_valid_header(key, value)) return -1;
     if (self->headers == 0) {
-        self->headers = new_header(key, value);
+        self->headers = httplib_header_new(key, value);
     } else {
         http_header * run = self->headers;
         while (run != 0) {
             if (run->next == 0) {
-                run->next = new_header(key, value);
+                run->next = httplib_header_new(key, value);
                 break;
             }
             run = run->next;
@@ -52,7 +52,7 @@ int add_header(http_response * self, char * key, char * value) {
     return 0;
 }
 
-char * get_header(http_request * self, char * key) {
+char * httplib_request_get_header(http_request * self, char * key) {
     http_header * run = self->headers;
     while (run != 0) {
         if (!strcasecmp(key, run->key)) {
@@ -65,7 +65,7 @@ char * get_header(http_request * self, char * key) {
     return NULL;
 }
 
-int is_valid_header(const char * key, const char * value) {
+int httplib_is_valid_header(const char * key, const char * value) {
     for (int i = 0; key[i] != '\0'; i++) {
         char c = key[i];
         if ((c < 65 && c != '-') || (c > 90 && c < 97 && c != '_') || c > 122) {
@@ -81,7 +81,7 @@ int is_valid_header(const char * key, const char * value) {
     return 1;
 }
 
-void free_request(http_request * self) {
+void httplib_request_free(http_request * self) {
     if (self == 0) return;
     if (self->headers != 0) {
         http_header * run = self->headers;
@@ -99,7 +99,7 @@ void free_request(http_request * self) {
     free(self);
 }
 
-void free_response(http_response * self) {
+void httplib_response_free(http_response * self) {
     if (self == 0) return;
     if (self->headers != 0) {
         http_header * run = self->headers;
@@ -116,7 +116,7 @@ void free_response(http_response * self) {
     free(self);
 }
 
-char * get_query_value(http_request * self, char * key) {
+char * httplib_request_get_query_value(http_request * self, char * key) {
     if (self->query == 0) return NULL;
     char * tmp = malloc(strlen(self->query)+1);
     int pos = 0;
@@ -151,25 +151,25 @@ char * get_query_value(http_request * self, char * key) {
     return NULL;
 }
 
-void set_content_length(http_response * self, size_t length) {
+void httplib_response_set_content_length(http_response * self, size_t length) {
     self->content_length = length;
     if (length > 0)
         self->body = malloc(length);
 }
 
-void set_status(http_response * self, int code, char * message) {
+void httplib_response_set_status(http_response * self, int code, char * message) {
     self->status_code = code;
     self->status_message = malloc(strlen(message)+1);
     strcpy(self->status_message, message);
 }
 
-void increase_tmp(struct tmp * tmp) {
+void httplib_tmp_increase(struct tmp * tmp) {
     tmp->size += 1024;
     tmp->buf = realloc(tmp->buf, tmp->size);
     bzero(tmp->buf + tmp->pos, 1024);
 }
 
-void reset_tmp(struct tmp * tmp) {
+void httplib_tmp_reset(struct tmp * tmp) {
     tmp->pos = 0;
     bzero(tmp->buf, tmp->size);
 }
