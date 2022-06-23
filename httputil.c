@@ -82,16 +82,8 @@ int httplib_is_valid_header(const char * key, const char * value) {
 }
 
 void httplib_request_free(http_request * self) {
-    if (self == 0) return;
     if (self->headers != 0) {
-        http_header * run = self->headers;
-        while (run != 0) {
-            http_header * to_free = run;
-            run = run->next;
-            if (to_free->key != 0) free(to_free->key);
-            if (to_free->value != 0) free(to_free->value);
-            free(to_free);
-        }
+        httplib_headers_free(self->headers);
     }
     if (self->query != 0) free(self->query);
     if (self->body != 0) free(self->body);
@@ -100,20 +92,23 @@ void httplib_request_free(http_request * self) {
 }
 
 void httplib_response_free(http_response * self) {
-    if (self == 0) return;
     if (self->headers != 0) {
-        http_header * run = self->headers;
-        while (run != 0) {
-            http_header * to_free = run;
-            run = run->next;
-            if (to_free->key != 0) free(to_free->key);
-            if (to_free->value != 0) free(to_free->value);
-            free(to_free);
-        }
+        httplib_headers_free(self->headers);
     }
     if (self->status_message != 0) free(self->status_message);
     if (self->body != 0) free(self->body);
     free(self);
+}
+
+void httplib_headers_free(http_header * self) {
+    http_header * run = self;
+    while (run) {
+        http_header * to_free = run;
+        run = run->next;
+        if (to_free->key != 0) free(to_free->key);
+        if (to_free->value != 0) free(to_free->value);
+        free(to_free);
+    }
 }
 
 char * httplib_request_get_query_value(http_request * self, char * key) {

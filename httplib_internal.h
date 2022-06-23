@@ -21,6 +21,7 @@ enum req_pos {
 
 void httplib_request_free(http_request * self);
 void httplib_response_free(http_response * self);
+void httplib_headers_free(http_header * self);
 
 http_header * httplib_header_new(char * key, char * value);
 http_request * httplib_request_new();
