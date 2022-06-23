@@ -3,6 +3,23 @@
 #include "httplib.h"
 #include "httplib_internal.h"
 
+struct t_http_method_string {
+    char * key;
+    http_method value;
+};
+
+static struct t_http_method_string http_method_strings[] = {
+        {"GET", GET},
+        {"POST", POST},
+        {"PUT", PUT},
+        {"DELETE", DELETE},
+        {"PATCH", PATCH},
+        {"HEAD", HEAD},
+        {"CONNECT", CONNECT},
+        {"OPTIONS", OPTIONS},
+        {"TRACE", TRACE}
+};
+
 int httplib_parse_buffer(char * buf, size_t bytes, http_request * req, struct tmp * tmp, enum req_pos * pos, int * was_cr) {
     for (int i = 0; i < bytes; i++) {
         if (buf[i] == '\r') {
@@ -76,28 +93,13 @@ int httplib_parse_buffer(char * buf, size_t bytes, http_request * req, struct tm
 }
 
 int httplib_parse_method(char * method_str, http_method * method_out) {
-    if (!strcmp(method_str, "GET")) {
-        *method_out = GET;
-    } else if (!strcmp(method_str, "POST")) {
-        *method_out = POST;
-    } else if (!strcmp(method_str, "PUT")) {
-        *method_out = PUT;
-    } else if (!strcmp(method_str, "DELETE")) {
-        *method_out = DELETE;
-    } else if (!strcmp(method_str, "PATCH")) {
-        *method_out = PATCH;
-    } else if (!strcmp(method_str, "HEAD")) {
-        *method_out = HEAD;
-    } else if (!strcmp(method_str, "CONNECT")) {
-        *method_out = CONNECT;
-    } else if (!strcmp(method_str, "OPTIONS")) {
-        *method_out = OPTIONS;
-    } else if (!strcmp(method_str, "TRACE")) {
-        *method_out = TRACE;
-    } else {
-        return -1;
+    for (int i = 0; i < 9; i++) {
+        if (!strcmp(http_method_strings[i].key, method_str)) {
+            *method_out = http_method_strings[i].value;
+            return 0;
+        }
     }
-    return 0;
+    return -1;
 }
 
 int httplib_parse_header(http_request * self, char * str) {
