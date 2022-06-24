@@ -48,7 +48,7 @@ int httplib_response_serialize(http_response * res, char * str_out) {
         strcat(str_out, "\r\n");
     }
     strcat(str_out, "\r\n");
-    size_t end_pos = strlen(str_out) - 1;
+    size_t end_pos = strlen(str_out);
     if (res->body != 0) {
         for (size_t i = 0; i < res->content_length; i++) {
             str_out[end_pos + i] = res->body[i];
