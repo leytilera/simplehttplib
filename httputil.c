@@ -168,3 +168,11 @@ void httplib_tmp_reset(struct tmp * tmp) {
     tmp->pos = 0;
     bzero(tmp->buf, tmp->size);
 }
+
+char httplib_decode_hex(const char * encoded) {
+    char input[3];
+    input[0] = encoded[0];
+    input[1] = encoded[1];
+    input[2] = '\0';
+    return (char) strtoul(input, 0, 16);
+}

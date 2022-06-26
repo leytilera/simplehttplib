@@ -114,6 +114,14 @@ char * httplib_request_get_query_value(http_request * self, char * key);
  */
 int httplib_is_valid_header(const char * key, const char * value);
 
+/**
+ * Helper function to decode a percent encoded character.
+ * @param encoded a pointer to the first of the two characters in the string
+ * after the percent symbol, which make up the encoded character
+ * @return the decoded character
+ */
+char httplib_decode_hex(const char * encoded);
+
 #define SOCKET_ERROR -1
 #define BIND_ERROR -2
 #define LISTEN_ERROR -3
