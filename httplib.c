@@ -46,7 +46,8 @@ int httplib_start_server(int port, http_request_handler handler) {
 
             http_response * res = httplib_response_new();
 
-            if (result == 1) handler(req, res); //TODO HTTP unsupported version response
+            if (result == 1) handler(req, res);
+            else if (result == 3) httplib_response_set_status(res, 505, "HTTP Version Not Supported");
             else if (result == 4) httplib_response_set_status(res, 400, "Bad Request");
             else httplib_response_set_status(res, 500, "Internal Server Error");
 
