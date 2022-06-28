@@ -91,7 +91,8 @@ void httplib_respond(int cfd, http_response * res) {
     if (ser_err != 0) {
         http_response * err_res = httplib_response_new();
         httplib_response_set_status(res, 500, "Internal Server Error");
-        res_bytes = realloc(res_bytes, httplib_response_string_size(err_res));
+        res_size = httplib_response_string_size(err_res);
+        res_bytes = realloc(res_bytes, res_size);
         httplib_response_serialize(err_res, res_bytes);
         httplib_response_free(err_res);
     }
